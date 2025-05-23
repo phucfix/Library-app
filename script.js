@@ -17,6 +17,11 @@ function Book(author, title, pages, isRead) {
     this.isRead = isRead;
 }
 
+// Add a method to the Book prototype to toggle the read status
+Book.prototype.toggleReadStatus = function() {
+    this.isRead = !this.isRead;
+};
+
 function addBookToLibrary(author, title, pages, isRead) {
     // take params, create a book then store it in the array
     const newBook = new Book(author, title, pages, isRead);
@@ -43,8 +48,35 @@ function createBookCard(book) {
         console.log(`${key} : ${book[key]}`);
 
         const bookInfo = document.createElement("p");
-        bookInfo.textContent = `${key} : ${book[key]}`
+        bookInfo.classList.add(`book-info-${key}`);
+        bookInfo.textContent = `${key} : ${book[key]}`;
         bookCardContainer.appendChild(bookInfo);
+    })
+
+    // Create delete book button
+    const deleteBook = document.createElement("button");
+    deleteBook.textContent = "Delete";
+    deleteBook.classList.add("delete-book");
+    bookCardContainer.appendChild(deleteBook);
+
+    deleteBook.addEventListener("click", () => {
+        if (bookCardContainer) {
+            bookContainer.removeChild(bookCardContainer);
+        }
+    })
+
+    // Create mark as read button
+    const markReadButton = document.createElement("button");
+    markReadButton.textContent = "Mark as Read";
+    markReadButton.classList.add("mark-as-read");
+    bookCardContainer.appendChild(markReadButton);
+
+    markReadButton.addEventListener("click", () => {
+        book.toggleReadStatus();
+
+        // Change the DOM
+        const readStatusElement = bookCardContainer.getElementsByClassName("book-info-isRead");
+        readStatusElement[0].textContent = `isRead : ${book.isRead}`;
     })
 
     bookContainer.appendChild(bookCardContainer);
@@ -60,13 +92,29 @@ const confirmBtn = bookDialog.querySelector("#confirm-btn");
 
 // "Show the dialog" button opens the <dialog> modally
 showButton.addEventListener("click", () => {
-  bookDialog.showModal();
+    bookDialog.showModal();
 });
 
 
 // Prevent the "confirm" button from the default behavior of submitting the form, and close the dialog with the `close()` method, which triggers the "close" event.
 confirmBtn.addEventListener("click", (event) => {
-  event.preventDefault(); // We don't want to submit this fake form 
-  bookDialog.close();  
+    event.preventDefault(); // We don't want to submit this fake form 
+
+    // Add new book
+    const form = document.getElementById("book-form");
+
+    const author = document.getElementById("author").value;
+    const title = document.getElementById("title").value;
+    const pages = document.getElementById("page").value;
+    const readStatus = form.querySelector('input[name="read-status"]:checked').value;
+    let isRead = (readStatus === "read") ? true : false;
+    
+//    console.log(author, title, page, readStatus);
+
+
+    const newBook = new Book(author, title, pages, isRead);
+    createBookCard(newBook);
+
+    bookDialog.close();  
 });
 
